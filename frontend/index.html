@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Адаптивное техническое интервью</title>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div class="header-inner container">
+        <div>
+          <div class="badge">MVP прототипа · frontend + backend + PostgreSQL</div>
+          <h1>Адаптивное техническое интервью</h1>
+          <p class="lead">
+            Интерфейс системы оценки компетенций аналитика данных:
+            задания приходят из PostgreSQL через Python backend, ответы сохраняются,
+            открытые ответы оценивает локальная Qwen2.5-Coder 1.5B через Ollama,
+            BKT обновляется на сервере, а браузер собирает поведенческие признаки.
+          </p>
+          <div class="hero-actions">
+            <button class="btn-primary" id="scrollToStartBtn">Начать интервью</button>
+            <button class="btn-light" id="resetSessionBtn">Сбросить сессию</button>
+          </div>
+        </div>
+
+        <div class="hero-panel">
+          <div class="hero-panel-row">
+            <span class="hero-panel-label">Статус backend</span>
+            <span class="hero-panel-value">FastAPI</span>
+          </div>
+          <div class="hero-panel-row">
+            <span class="hero-panel-label">Модель оценки</span>
+            <span class="hero-panel-value">BKT backend</span>
+          </div>
+          <div class="hero-panel-row">
+            <span class="hero-panel-label">Открытые ответы</span>
+            <span class="hero-panel-value">Qwen2.5-Coder 1.5B</span>
+          </div>
+          <div class="hero-panel-row">
+            <span class="hero-panel-label">Поведенческий анализ</span>
+            <span class="hero-panel-value">ML model</span>
+          </div>
+          <div class="hero-panel-row">
+            <span class="hero-panel-label">Целевая роль</span>
+            <span class="hero-panel-value">Data Analyst</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main" id="startBlock">
+      <div class="container">
+        <div class="layout">
+        <section>
+          <div class="card" id="candidateCard">
+            <h2 class="section-title">Данные кандидата</h2>
+            <p class="section-description">
+              Эти данные отправляются в backend, где создаётся кандидат и сессия интервью.
+            </p>
+
+            <form class="candidate-form" id="candidateForm">
+              <div class="field">
+                <label for="candidateName">ФИО кандидата</label>
+                <input id="candidateName" type="text" placeholder="Иванов Иван" required />
+              </div>
+
+              <div class="field">
+                <label for="candidateEmail">Email</label>
+                <input id="candidateEmail" type="email" placeholder="ivanov@example.com" required />
+              </div>
+
+              <div class="field full">
+                <button class="btn-primary" type="submit">Запустить интервью</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="card hidden" id="interviewCard">
+            <h2 class="section-title">Текущее задание</h2>
+            <p class="section-description">
+              После отправки ответа backend проверяет тестовые задания по эталону, а развернутые ответы
+              оценивает локальной Qwen2.5-Coder 1.5B, обновляет BKT и выбирает следующее задание.
+            </p>
+
+            <div class="task-meta">
+              <span class="pill" id="taskNumberPill">Задание 1</span>
+              <span class="pill" id="skillPill">Компетенция</span>
+              <span class="pill" id="difficultyPill">Сложность</span>
+              <span class="pill" id="typePill">Формат ответа</span>
+            </div>
+
+            <div class="task-box" id="taskText"></div>
+
+            <div class="field answer-field">
+              <label for="answerInput" id="answerLabel">Ответ кандидата</label>
+              <textarea id="answerInput" placeholder="Введите развернутый ответ..."></textarea>
+              <div class="answer-control hidden" id="choiceAnswerField"></div>
+              <div class="answer-control hidden" id="matchingAnswerField"></div>
+            </div>
+
+            <div class="answer-actions">
+              <span class="small-muted" id="typingHint">Поведенческие события начнут фиксироваться после запуска интервью.</span>
+              <button class="btn-primary" id="submitAnswerBtn">Отправить ответ</button>
+            </div>
+          </div>
+
+          <div class="card hidden" id="reportCard">
+            <h2 class="section-title">Итоговый отчёт</h2>
+            <p class="section-description">
+              Отчёт формируется backend-ом на основе сохранённых ответов, BKT и признаков поведения.
+            </p>
+
+            <div class="report-grid">
+              <div class="report-cell">
+                <strong id="reportProfileCount">0</strong>
+                <span>Проверено компетенций</span>
+                <small id="reportProfileLevel">Профиль еще не сформирован.</small>
+              </div>
+              <div class="report-cell">
+                <strong id="reportRisk">0%</strong>
+                <span>Вероятность аномального поведения</span>
+                <small id="reportRiskLevel">Уровень риска еще не рассчитан.</small>
+              </div>
+              <div class="report-cell">
+                <strong id="reportAnswers">0/0</strong>
+                <span>Индекс по проверенным компетенциям</span>
+                <small id="reportIndexLevel">Уровень сформированности еще не рассчитан.</small>
+              </div>
+            </div>
+            <p class="report-note" id="reportCoverageNote"></p>
+
+            <div class="task-box" style="margin-top: 18px;">
+              <h3>Интерпретация</h3>
+              <p id="reportText"></p>
+            </div>
+
+            <div class="task-box" style="margin-top: 18px;">
+              <h3>Score-профиль компетенций</h3>
+              <div class="competency-profile" id="reportBktProfile"></div>
+            </div>
+
+            <div class="task-box" style="margin-top: 18px;">
+              <h3>Траектория заданий</h3>
+              <div class="trajectory-list" id="reportTaskTrajectory"></div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="sidebar">
+          <div class="card">
+            <h2 class="section-title">Состояние сессии</h2>
+            <p class="section-description">Показатели обновляются после ответа backend-а.</p>
+
+            <div class="metric">
+              <div class="metric-head">
+                <span>BKT текущей компетенции</span>
+                <strong id="knowledgeValue">45%</strong>
+              </div>
+              <div class="progress"><div class="progress-fill" id="knowledgeBar"></div></div>
+            </div>
+
+            <div class="metric">
+              <div class="metric-head">
+                <span>Риск внешней помощи</span>
+                <strong id="riskValue" class="risk-low">0%</strong>
+              </div>
+              <div class="progress"><div class="progress-fill" id="riskBar"></div></div>
+            </div>
+
+            <div class="metric">
+              <div class="metric-head">
+                <span>Номер задания</span>
+                <strong id="taskCounter">0 / 27</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2 class="section-title">Логи поведения</h2>
+            <p class="section-description">Фиксируются события браузера: ввод, вставка, копирование, уход со страницы.</p>
+            <div class="log-list" id="logList"></div>
+          </div>
+        </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

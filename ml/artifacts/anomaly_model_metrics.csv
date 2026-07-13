@@ -1,0 +1,8 @@
+model,accuracy,precision,recall,f1,fit_time_sec,complexity_rank
+LogisticRegression,1.0,1.0,1.0,1.0,0.049,1
+DecisionTree,1.0,1.0,1.0,1.0,0.038,2
+KNeighborsClassifier,1.0,1.0,1.0,1.0,0.101,3
+RandomForest,0.999,0.9967,1.0,0.9983,0.704,4
+CatBoost,0.999,0.9967,1.0,0.9983,0.624,7
+XGBoost,0.998,0.9934,1.0,0.9967,0.15,6
+GradientBoosting,0.998,0.9934,1.0,0.9967,1.76,5
